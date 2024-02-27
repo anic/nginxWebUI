@@ -3,7 +3,7 @@ package com.cym.config;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import com.cym.model.Admin;
 import com.cym.model.Basic;
-import com.cym.model.Cert;
 import com.cym.model.Http;
-import com.cym.model.Password;
 import com.cym.service.BasicService;
 import com.cym.service.ConfService;
 import com.cym.service.SettingService;
-import com.cym.sqlhelper.utils.JdbcTemplate;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.EncodePassUtils;
 import com.cym.utils.MessageUtils;
@@ -34,7 +31,6 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
-import cn.hutool.crypto.SecureUtil;
 
 @Component
 public class InitConfig {
@@ -55,16 +51,13 @@ public class InitConfig {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
-	JdbcTemplate jdbcTemplate;
-	@Inject
 	ConfService confService;
 
 	@Inject("${project.findPass}")
 	Boolean findPass;
 
 	@Init
-	public void init() throws IOException {
-
+	public void start() throws Throwable {
 		// 找回密码
 		if (findPass) {
 			List<Admin> admins = sqlHelper.findAll(Admin.class);
@@ -82,7 +75,7 @@ public class InitConfig {
 		if (count == 0) {
 			List<Basic> basics = new ArrayList<Basic>();
 			basics.add(new Basic("worker_processes", "auto", 1l));
-			basics.add(new Basic("events", "{\r\n    worker_connections  1024;\r\n    accept_mutex on;\r\n" + "}", 2l));
+			basics.add(new Basic("events", "{\r\n    worker_connections  1024;\r\n    accept_mutex on;\r\n}", 2l));
 			sqlHelper.insertAll(basics);
 		}
 
@@ -134,25 +127,13 @@ public class InitConfig {
 			RuntimeUtil.exec("chmod a+x " + homeConfig.acmeSh);
 
 			// 查找ngx_stream_module模块
-			if (!basicService.contain("ngx_stream_module.so")) {
-				if (FileUtil.exist("/usr/lib/nginx/modules/ngx_stream_module.so")) {
-					Basic basic = new Basic("load_module", "/usr/lib/nginx/modules/ngx_stream_module.so", -10l);
-					sqlHelper.insert(basic);
-				} else {
-					logger.info(m.get("commonStr.ngxStream"));
-					List<String> list = RuntimeUtil.execForLines(CharsetUtil.systemCharset(), "find / -name ngx_stream_module.so");
-					for (String path : list) {
-						if (path.contains("ngx_stream_module.so") && path.length() < 80) {
-							Basic basic = new Basic("load_module", path, -10l);
-							sqlHelper.insert(basic);
-							break;
-						}
-					}
-				}
+			if (!basicService.contain("ngx_stream_module.so") && FileUtil.exist("/usr/lib/nginx/modules/ngx_stream_module.so")) {
+				Basic basic = new Basic("load_module", "/usr/lib/nginx/modules/ngx_stream_module.so", -10l);
+				sqlHelper.insert(basic);
 			}
 
 			// 判断是否存在nginx命令
-			if (hasNginx()) {
+			if (hasNginx() && StrUtil.isEmpty(settingService.get("nginxExe"))) {
 				// 设置nginx执行文件
 				settingService.set("nginxExe", "nginx");
 			}
@@ -173,32 +154,39 @@ public class InitConfig {
 			}
 		}
 
-		// 将复制的证书文件还原到acme文件夹里面
-		List<Cert> certs = confService.getApplyCerts();
-		for (Cert cert : certs) {
-			boolean update = false;
-			if (cert.getPem().equals(homeConfig.home + "cert/" + cert.getDomain() + ".fullchain.cer")) {
-				cert.setPem(homeConfig.acmeShDir + cert.getDomain() + "/fullchain.cer");
-				update = true;
-			}
-			if (cert.getKey().equals(homeConfig.home + "cert/" + cert.getDomain() + ".key")) {
-				cert.setKey(homeConfig.acmeShDir + cert.getDomain() + "/" + cert.getDomain() + ".key");
-				update = true;
-			}
+//		// 将复制的证书文件还原到acme文件夹里面
+//		List<Cert> certs = confService.getApplyCerts();
+//		for (Cert cert : certs) {
+//			boolean update = false;
+//			if (cert.getPem() != null && cert.getPem().equals(homeConfig.home + "cert/" + cert.getDomain() + ".fullchain.cer")) {
+//				cert.setPem(homeConfig.acmeShDir + cert.getDomain() + "/fullchain.cer");
+//				update = true;
+//			}
+//			if (cert.getKey() != null && cert.getKey().equals(homeConfig.home + "cert/" + cert.getDomain() + ".key")) {
+//				cert.setKey(homeConfig.acmeShDir + cert.getDomain() + "/" + cert.getDomain() + ".key");
+//				update = true;
+//			}
+//
+//			if (update) {
+//				sqlHelper.updateById(cert);
+//			}
+//		}
 
-			if (update) {
-				sqlHelper.updateById(cert);
-			}
-		}
+//		// 证书加密方式RAS改为RSA
+//		certs = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(Cert::getEncryption, "RAS"), Cert.class);
+//		for (Cert cert : certs) {
+//			cert.setEncryption("RSA");
+//			sqlHelper.updateById(cert);
+//		}
 
-		// 将密码加密
-		List<Admin> admins = sqlHelper.findAll(Admin.class);
-		for (Admin admin : admins) {
-			if (!StrUtil.endWith(admin.getPass(), SecureUtil.md5(EncodePassUtils.defaultPass))) {
-				admin.setPass(EncodePassUtils.encode(admin.getPass()));
-				sqlHelper.updateById(admin);
-			}
-		}
+//		// 将密码加密
+//		List<Admin> admins = sqlHelper.findAll(Admin.class);
+//		for (Admin admin : admins) {
+//			if (!StrUtil.endWith(admin.getPass(), SecureUtil.md5(EncodePassUtils.defaultPass))) {
+//				admin.setPass(EncodePassUtils.encode(admin.getPass()));
+//				sqlHelper.updateById(admin);
+//			}
+//		}
 
 		// 展示logo
 		showLogo();
@@ -215,16 +203,16 @@ public class InitConfig {
 
 	private void showLogo() throws IOException {
 		ClassPathResource resource = new ClassPathResource("banner.txt");
-		BufferedReader reader = resource.getReader(Charset.forName("utf-8"));
+		BufferedReader reader = resource.getReader(StandardCharsets.UTF_8);
 		String str = null;
 		StringBuilder stringBuilder = new StringBuilder();
 		// 使用readLine() 比较方便的读取一行
 		while (null != (str = reader.readLine())) {
-			stringBuilder.append(str + "\n");
+			stringBuilder.append(str).append("\n");
 		}
 		reader.close();// 关闭流
 
-		stringBuilder.append("nginxWebUI " + versionConfig.currentVersion + "\n");
+		stringBuilder.append("nginxWebUI ").append(versionConfig.currentVersion).append("\n");
 
 		logger.info(stringBuilder.toString());
 

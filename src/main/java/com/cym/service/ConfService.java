@@ -3,7 +3,6 @@ package com.cym.service;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +32,7 @@ import com.cym.sqlhelper.bean.Sort;
 import com.cym.sqlhelper.bean.Sort.Direction;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
+import com.cym.utils.SystemTool;
 import com.cym.utils.ToolUtils;
 import com.github.odiszapc.nginxparser.NgxBlock;
 import com.github.odiszapc.nginxparser.NgxConfig;
@@ -92,6 +92,10 @@ public class ConfService {
 			NgxBlock ngxBlockHttp = new NgxBlock();
 			ngxBlockHttp.addValue("http");
 			for (Http http : httpList) {
+				if (http.getEnable() == null || !http.getEnable()) {
+					continue;
+				}
+
 				NgxParam ngxParam = new NgxParam();
 				ngxParam.addValue(http.getName().trim() + " " + http.getValue().trim());
 				ngxBlockHttp.addEntry(ngxParam);
@@ -139,10 +143,10 @@ public class ConfService {
 				hasHttp = true;
 
 				if (decompose) {
-					addConfFile(confExt, "upstreams." + upstream.getName() + ".conf", ngxBlockServer);
+					String filename = addConfFile(nginxPath, confExt, "upstreams." + upstream.getName() + ".conf", ngxBlockServer);
 
 					ngxParam = new NgxParam();
-					ngxParam.addValue("include " + new File(nginxPath).getParent().replace("\\", "/") + "/conf.d/upstreams." + upstream.getName().replace(" ", "_").replace("*", "-") + ".conf");
+					ngxParam.addValue("include " + filename);
 					ngxBlockHttp.addEntry(ngxParam);
 
 				} else {
@@ -169,10 +173,10 @@ public class ConfService {
 						name = server.getServerName();
 					}
 
-					addConfFile(confExt, name + ".conf", ngxBlockServer);
+					String filename = addConfFile(nginxPath, confExt, name + ".conf", ngxBlockServer);
 
 					ngxParam = new NgxParam();
-					ngxParam.addValue("include " + new File(nginxPath).getParent().replace("\\", "/") + "/conf.d/" + name.replace(" ", "_").replace("*", "-") + ".conf");
+					ngxParam.addValue("include " + filename);
 
 					if (noContain(ngxBlockHttp, ngxParam)) {
 						ngxBlockHttp.addEntry(ngxParam);
@@ -207,10 +211,10 @@ public class ConfService {
 				NgxBlock ngxBlockServer = buildBlockUpstream(upstream);
 
 				if (decompose) {
-					addConfFile(confExt, "upstreams." + upstream.getName() + ".conf", ngxBlockServer);
+					String filename = addConfFile(nginxPath, confExt, "upstreams." + upstream.getName() + ".conf", ngxBlockServer);
 
 					ngxParam = new NgxParam();
-					ngxParam.addValue("include " + new File(nginxPath).getParent().replace("\\", "/") + "/conf.d/upstreams." + upstream.getName().replace(" ", "_").replace("*", "-") + ".conf");
+					ngxParam.addValue("include " + filename);
 					ngxBlockStream.addEntry(ngxParam);
 				} else {
 					ngxBlockStream.addEntry(ngxBlockServer);
@@ -238,10 +242,10 @@ public class ConfService {
 						type = "udp";
 					}
 
-					addConfFile(confExt, type + "." + server.getListen() + ".conf", ngxBlockServer);
+					String filename = addConfFile(nginxPath, confExt, type + "." + server.getListen() + ".conf", ngxBlockServer);
 
 					ngxParam = new NgxParam();
-					ngxParam.addValue("include " + new File(nginxPath).getParent().replace("\\", "/") + "/conf.d/" + type + "." + server.getListen() + ".conf");
+					ngxParam.addValue("include " + filename);
 					ngxBlockStream.addEntry(ngxParam);
 				} else {
 					ngxBlockStream.addEntry(ngxBlockServer);
@@ -255,6 +259,11 @@ public class ConfService {
 			}
 
 			String conf = ToolUtils.handleConf(new NgxDumper(ngxConfig).dump());
+			// 将多个;替换成单一;
+			while (conf.contains(";;")) {
+				conf = conf.replaceAll(";;", ";");
+			}
+
 			confExt.setConf(conf);
 
 			return confExt;
@@ -281,7 +290,7 @@ public class ConfService {
 			}
 
 		}
-		
+
 		if (StrUtil.isNotEmpty(upstream.getTactics())) {
 			ngxParam = new NgxParam();
 			ngxParam.addValue(upstream.getTactics());
@@ -381,7 +390,7 @@ public class ConfService {
 				NgxBlock ngxBlockLocation = new NgxBlock();
 				ngxBlockLocation.addValue("location");
 				ngxBlockLocation.addValue(location.getPath());
-				
+
 				if (StrUtil.isNotEmpty(location.getDescr())) {
 					String[] descrs = location.getDescr().split("\n");
 					for (String d : descrs) {
@@ -390,9 +399,9 @@ public class ConfService {
 						ngxBlockLocation.addEntry(ngxParam);
 					}
 				}
-				
+
 				if (location.getType() == 0 || location.getType() == 2) { // location或负载均衡
-					
+
 					if (location.getType() == 0) {
 						ngxParam = new NgxParam();
 						ngxParam.addValue("proxy_pass " + location.getValue());
@@ -406,9 +415,9 @@ public class ConfService {
 						}
 					}
 
-					if (location.getHeader() == 1) { // 设置header
+					if (location.getHeader() == 1) { // 设置header参数
 						ngxParam = new NgxParam();
-						ngxParam.addValue("proxy_set_header Host $host");
+						ngxParam.addValue("proxy_set_header Host " + location.getHeaderHost());
 						ngxBlockLocation.addEntry(ngxParam);
 
 						ngxParam = new NgxParam();
@@ -432,7 +441,7 @@ public class ConfService {
 						ngxBlockLocation.addEntry(ngxParam);
 					}
 
-					if (location.getWebsocket() == 1) { // 设置header
+					if (location.getWebsocket() == 1) { // 设置websocket
 						ngxParam = new NgxParam();
 						ngxParam.addValue("proxy_http_version 1.1");
 						ngxBlockLocation.addEntry(ngxParam);
@@ -444,6 +453,34 @@ public class ConfService {
 						ngxParam = new NgxParam();
 						ngxParam.addValue("proxy_set_header Connection \"upgrade\"");
 						ngxBlockLocation.addEntry(ngxParam);
+					}
+
+					if (location.getCros() == 1) { // 设置跨域
+						ngxParam = new NgxParam();
+						ngxParam.addValue("add_header Access-Control-Allow-Origin *");
+						ngxBlockLocation.addEntry(ngxParam);
+
+						ngxParam = new NgxParam();
+						ngxParam.addValue("add_header Access-Control-Allow-Methods *");
+						ngxBlockLocation.addEntry(ngxParam);
+
+						ngxParam = new NgxParam();
+						ngxParam.addValue("add_header Access-Control-Allow-Headers *");
+						ngxBlockLocation.addEntry(ngxParam);
+
+						ngxParam = new NgxParam();
+						ngxParam.addValue("add_header Access-Control-Allow-Credentials true");
+						ngxBlockLocation.addEntry(ngxParam);
+
+						NgxBlock ngxBlock = new NgxBlock();
+						ngxBlock.addValue("if ($request_method = 'OPTIONS')");
+						ngxParam = new NgxParam();
+
+						ngxParam.addValue("return 204");
+						ngxBlock.addEntry(ngxParam);
+
+						ngxBlockLocation.addEntry(ngxBlock);
+
 					}
 
 					if (server.getSsl() == 1 && server.getRewrite() == 1) { // redirect http转https
@@ -493,7 +530,7 @@ public class ConfService {
 				value += " proxy_protocol";
 			}
 			if (server.getProxyType() == 2) {
-				value += " udp reuseport";
+				value += " udp";
 			}
 			if (server.getSsl() != null && server.getSsl() == 1) {
 				value += " ssl";
@@ -606,10 +643,6 @@ public class ConfService {
 	}
 
 	public String buildNodeStr(UpstreamServer upstreamServer) {
-		String status = "";
-		if (!"none".equals(upstreamServer.getStatus())) {
-			status = upstreamServer.getStatus();
-		}
 
 		if (upstreamServer.getServer().contains(":")) {
 			upstreamServer.setServer("[" + upstreamServer.getServer() + "]");
@@ -628,7 +661,12 @@ public class ConfService {
 		if (upstreamServer.getMaxConns() != null) {
 			conf += " max_conns=" + upstreamServer.getMaxConns();
 		}
-		conf += " " + status;
+		if (!"none".equals(upstreamServer.getStatus())) {
+			conf += " " + upstreamServer.getStatus();
+		}
+		if (upstreamServer.getParam() != null) {
+			conf += " " + upstreamServer.getParam();
+		}
 		return conf;
 	}
 
@@ -655,8 +693,8 @@ public class ConfService {
 		}
 	}
 
-	private void addConfFile(ConfExt confExt, String name, NgxBlock ngxBlockServer) {
-		name = name.replace(" ", "_").replace("*", "-");
+	private String addConfFile(String nginxPath, ConfExt confExt, String name, NgxBlock ngxBlockServer) {
+		name = name.replace(" ", "_").replaceAll("[!@#$%^&*()_+=\\{\\}\\[\\]\"<>,/;':\\\\|`~]+", "_");
 
 		boolean hasSameName = false;
 		for (ConfFile confFile : confExt.getFileList()) {
@@ -672,6 +710,8 @@ public class ConfService {
 			confFile.setConf(buildStr(ngxBlockServer));
 			confExt.getFileList().add(confFile);
 		}
+
+		return new File(nginxPath).getParent().replace("\\", "/") + "/conf.d/" + name;
 	}
 
 	private String buildStr(NgxBlock ngxBlockServer) {
@@ -734,18 +774,16 @@ public class ConfService {
 	}
 
 	public AsycPack getAsycPack(String[] asycData) {
-		String data = StrUtil.join(",", Arrays.asList(asycData));
-
 		AsycPack asycPack = new AsycPack();
-		if (data.contains("basic") || data.contains("all")) {
+		if (hasStr(asycData, "basic") || hasStr(asycData, "all")) {
 			asycPack.setBasicList(sqlHelper.findAll(Basic.class));
 		}
 
-		if (data.contains("http") || data.contains("all")) {
+		if (hasStr(asycData, "http") || hasStr(asycData, "all")) {
 			asycPack.setHttpList(sqlHelper.findAll(Http.class));
 		}
 
-		if (data.contains("server") || data.contains("all")) {
+		if (hasStr(asycData, "server") || hasStr(asycData, "all")) {
 			List<Server> serverList = sqlHelper.findAll(Server.class);
 			for (Server server : serverList) {
 				if (StrUtil.isNotEmpty(server.getPem()) && FileUtil.exist(server.getPem())) {
@@ -760,7 +798,7 @@ public class ConfService {
 			asycPack.setLocationList(sqlHelper.findAll(Location.class));
 		}
 
-		if (data.contains("password") || data.contains("all")) {
+		if (hasStr(asycData, "password") || hasStr(asycData, "all")) {
 			List<Password> passwordList = sqlHelper.findAll(Password.class);
 			for (Password password : passwordList) {
 				if (StrUtil.isNotEmpty(password.getPath()) && FileUtil.exist(password.getPath())) {
@@ -771,21 +809,30 @@ public class ConfService {
 			asycPack.setPasswordList(passwordList);
 		}
 
-		if (data.contains("upstream") || data.contains("all")) {
+		if (hasStr(asycData, "upstream") || hasStr(asycData, "all")) {
 			asycPack.setUpstreamList(sqlHelper.findAll(Upstream.class));
 			asycPack.setUpstreamServerList(sqlHelper.findAll(UpstreamServer.class));
 		}
 
-		if (data.contains("stream") || data.contains("all")) {
+		if (hasStr(asycData, "stream") || hasStr(asycData, "all")) {
 			asycPack.setStreamList(sqlHelper.findAll(Stream.class));
 		}
 
-		if (data.contains("param") || data.contains("all")) {
+		if (hasStr(asycData, "param") || hasStr(asycData, "all")) {
 			asycPack.setTemplateList(sqlHelper.findAll(Template.class));
 			asycPack.setParamList(sqlHelper.findAll(Param.class));
 		}
 
 		return asycPack;
+	}
+
+	private boolean hasStr(String[] asycData, String data) {
+		for (String str : asycData) {
+			if (str.equals(data)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void setAsycPack(AsycPack asycPack) {
@@ -811,10 +858,12 @@ public class ConfService {
 				for (Server server : asycPack.getServerList()) {
 					try {
 						if (StrUtil.isNotEmpty(server.getPem()) && StrUtil.isNotEmpty(server.getPemStr())) {
-							FileUtil.writeString(server.getPemStr(), server.getPem(), StandardCharsets.UTF_8);
+							String pemPath = SystemTool.isWindows() ? server.getPem().replace("*", "_") : server.getPem();
+							FileUtil.writeString(server.getPemStr(), pemPath, StandardCharsets.UTF_8);
 						}
 						if (StrUtil.isNotEmpty(server.getKey()) && StrUtil.isNotEmpty(server.getKeyStr())) {
-							FileUtil.writeString(server.getKeyStr(), server.getKey(), StandardCharsets.UTF_8);
+							String keyPath = SystemTool.isWindows() ? server.getKey().replace("*", "_") : server.getKey();
+							FileUtil.writeString(server.getKeyStr(), keyPath, StandardCharsets.UTF_8);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();

@@ -36,7 +36,7 @@ $(function() {
 		var upload = layui.upload;
 		upload.render({
 			elem: '#pemBtn',
-			url: '/adminPage/main/upload',
+			url: '/adminPage/server/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -53,7 +53,7 @@ $(function() {
 
 		upload.render({
 			elem: '#keyBtn',
-			url: '/adminPage/main/upload',
+			url: '/adminPage/server/upload',
 			accept: 'file',
 			done: function(res) {
 				// 上传完毕回调
@@ -170,10 +170,19 @@ function add() {
 }
 
 function showWindow(title) {
+	
+	var width = "1350px";
+	var height = "90%";
+	if(window.innerWidth <= 1000){
+		// 手机端
+		width = "1000px";
+		height = "1500px";
+	}
+	
 	layer.open({
 		type: 1,
 		title: title,
-		area: ['1350px', '90%'], // 宽高
+		area: [width, height], // 宽高
 		content: $('#windowDiv')
 	});
 }
@@ -183,11 +192,6 @@ function addOver() {
 		layer.msg(serverStr.noPort);
 		return;
 	}
-
-	/*if ($("#ssl").val() == 1 && $("#serverName").val() == '') {
-		layer.msg(serverStr.sslTips);
-		return;
-	}*/
 
 	var over = true;
 	$("input[name='path']").each(function() {
@@ -283,6 +287,9 @@ function addOver() {
 		location.locationParamJson = $(this).find("textarea[name='locationParamJson']").val();
 		location.header = $(this).find("input[name='header']").prop("checked") ? 1 : 0;
 		location.websocket = $(this).find("input[name='websocket']").prop("checked") ? 1 : 0;
+		location.cros = $(this).find("input[name='cros']").prop("checked") ? 1 : 0;
+		location.headerHost = $(this).find("select[name='headerHost']").val();
+		
 		locations.push(location);
 	})
 
@@ -420,6 +427,7 @@ function edit(id, clone) {
 					$("#" + uuid + " select[name='upstreamType']").val(location.upstreamType);
 					$("#" + uuid + " select[name='upstreamId']").val(location.upstreamId);
 					$("#" + uuid + " input[name='upstreamPath']").val(location.upstreamPath);
+					$("#" + uuid + " select[name='headerHost']").val(location.headerHost);
 
 					if (location.header == 1) {
 						$("#" + uuid + " input[name='header']").prop("checked", true);
@@ -433,6 +441,12 @@ function edit(id, clone) {
 						$("#" + uuid + " input[name='websocket']").prop("checked", false);
 					}
 
+					if (location.cros == 1) {
+						$("#" + uuid + " input[name='cros']").prop("checked", true);
+					} else {
+						$("#" + uuid + " input[name='cros']").prop("checked", false);
+					}
+					
 					checkType(location.type, uuid)
 				}
 
@@ -515,15 +529,15 @@ function buildHtml(uuid, location, upstreamSelect) {
 					</div>
 				</td>
 				
-				<td>
+				<td style="width: 740px;">
 					<span name="valueSpan">
 						<div class="layui-inline">
-							<input type="text"  style="width: 240px;" name="value" id="value_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：http://127.0.0.1:8080">
+							<input type="text"  style="width: 277px;" name="value" id="value_${uuid}" class="layui-input long" value=""  placeholder="${serverStr.example}：http://127.0.0.1:8080">
 						</div>
 					</span>
 					
 					<span name="rootPathSpan">
-						<div class="layui-inline" style="width: 150px;">
+						<div class="layui-inline" style="width: 124px;"> 
 							<select name="rootType" >
 								<option value="root">${serverStr.rootModel}</option>
 								<option value="alias">${serverStr.aliasModel}</option>
@@ -533,9 +547,11 @@ function buildHtml(uuid, location, upstreamSelect) {
 						<div class="layui-inline" style="width: 150px;">
 							<input type="text" name="rootPath" id="rootPath_${uuid}" class="layui-input" placeholder="${serverStr.example}：/root/www">
 						</div>
-							
-						<i class="layui-icon layui-icon-export" lang="value" onclick="selectWww('${uuid}')"></i> 
-							
+						
+						<div class="layui-inline">
+							<i class="layui-icon layui-icon-export" lang="value" onclick="selectWww('${uuid}')"></i> 
+						</div>
+						
 						<div class="layui-inline" style="width: 120px;">
 							<input type="text" name="rootPage" id="rootPage_${uuid}" class="layui-input" placeholder="${serverStr.defaultPage}">
 						</div>	
@@ -549,22 +565,41 @@ function buildHtml(uuid, location, upstreamSelect) {
 					
 					</span>
 					
-					<span  name="headerSpan">
-						<div class="layui-inline">
-							<input type="checkbox" name="header" title="${serverStr.headerAddHost}" lay-skin="primary" checked> 
-						</div>
+					<span  name="headerSpan" style="padding-left:7px;">
 						<div class="layui-inline">
 							<input type="checkbox" name="websocket" title="${serverStr.websocket}" lay-skin="primary"> 
+						</div>
+						<div class="layui-inline">
+							<input type="checkbox" name="cros" title="${serverStr.cros}" lay-skin="primary"> 
+						</div>
+						<div class="layui-inline">
+							<input type="checkbox" name="header" title="${serverStr.headerAddHost} :" lay-skin="primary" checked> 
+						</div>
+						<div class="layui-inline" style="width: 110px;">
+							<select name="headerHost" lay-filter="type">
+								<option ${location.headerHost == '$host' ? 'selected' : ''}>$host</option>
+								<option ${location.headerHost == '$http_host' ? 'selected' : ''}>$http_host</option>
+								<option ${location.headerHost == '$host:$proxy_port' ? 'selected' : ''}>$host:$proxy_port</option>
+								<option ${location.headerHost == '$host:$server_port' ? 'selected' : ''}>$host:$server_port</option>
+								
+							</select>
 						</div>
 					</span>
 				</td> 
 				<td>
 					<textarea style="display: none;" id="locationParamJson_${uuid}" name="locationParamJson" >${location.locationParamJson}</textarea>
-					<button type="button" class="layui-btn layui-btn-sm" onclick="locationParam('${uuid}')">${serverStr.extParm}</button>
-					<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
-					
-					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
-					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-sm" onclick="locationParam('${uuid}')">${serverStr.extParm}</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="delTr('${uuid}')">${commonStr.del}</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', -1)">${commonStr.up}</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="setParamOrder('${uuid}', 1)">${commonStr.down}</button>
+					</div>
 				</td>
 			</tr>`
 

@@ -69,7 +69,7 @@ public class ServerService {
 		return sqlHelper.findListByQuery(new ConditionAndWrapper().eq("serverId", serverId), Location.class);
 	}
 
-	public void addOver(Server server, String serverParamJson, List<Location> locations) throws Exception {
+	public void addOver(Server server, String serverParamJson, List<Location> locations) {
 
 		if (server.getDef() != null && server.getDef() == 1) {
 			clearDef();
@@ -78,7 +78,7 @@ public class ServerService {
 		sqlHelper.insertOrUpdate(server);
 
 		List<Param> paramList = new ArrayList<Param>();
-		if (StrUtil.isNotEmpty(serverParamJson) && JSONUtil.isJson(serverParamJson)) {
+		if (StrUtil.isNotEmpty(serverParamJson) && JSONUtil.isTypeJSON(serverParamJson)) {
 			paramList = JSONUtil.toList(JSONUtil.parseArray(serverParamJson), Param.class);
 		}
 		List<String> locationIds = sqlHelper.findIdsByQuery(new ConditionAndWrapper().eq("serverId", server.getId()), Location.class);
@@ -122,7 +122,7 @@ public class ServerService {
 	private String findLocationDescr(List<Location> locationOlds, Location locationNew) {
 
 		for (Location location : locationOlds) {
-			if (location.getPath().equals(locationNew.getPath()) && location.getType() == locationNew.getType()) {
+			if (location.getPath().equals(locationNew.getPath()) && location.getType().equals(locationNew.getType())) {
 				return location.getDescr();
 			}
 
@@ -145,10 +145,12 @@ public class ServerService {
 		List<String> locationIds = sqlHelper.findIdsByQuery(new ConditionAndWrapper().eq("serverId", server.getId()), Location.class);
 		sqlHelper.deleteByQuery(new ConditionOrWrapper().eq("serverId", server.getId()).in("locationId", locationIds), Param.class);
 		List<Param> paramList = new ArrayList<Param>();
-		if (StrUtil.isNotEmpty(serverParamJson) && JSONUtil.isJson(serverParamJson)) {
+		if (StrUtil.isNotEmpty(serverParamJson) && JSONUtil.isTypeJSON(serverParamJson)) {
 			paramList = JSONUtil.toList(JSONUtil.parseArray(serverParamJson), Param.class);
 		}
-
+		
+		// 反向插入,保证列表与输入框对应
+		Collections.reverse(paramList);
 		for (Param param : paramList) {
 			param.setServerId(server.getId());
 			sqlHelper.insert(param);
@@ -292,7 +294,7 @@ public class ServerService {
 			rs.add(str);
 		}
 
-		String initNginxPath = FileUtil.getTmpDirPath() + UUID.randomUUID().toString();
+		String initNginxPath = FileUtil.getTmpDirPath() + UUID.randomUUID();
 		FileUtil.writeLines(rs, initNginxPath, CharsetUtil.CHARSET_UTF_8);
 		return initNginxPath;
 	}

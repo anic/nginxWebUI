@@ -7,7 +7,6 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.ModelAndView;
 
-import com.cym.config.InitConfig;
 import com.cym.model.Http;
 import com.cym.service.HttpService;
 import com.cym.service.SettingService;
@@ -89,7 +88,7 @@ public class HttpController extends BaseController {
 			http.setName("map");
 			http.setValue("$http_upgrade $connection_upgrade {\r\n" //
 					+ "    default upgrade;\r\n" //
-					+ "    '' close;\r\n" + "}\r\n" + "");//
+					+ "    '' close;\r\n" + "}\r\n");//
 			http.setUnit("");
 			https.add(http);
 		}
@@ -99,11 +98,15 @@ public class HttpController extends BaseController {
 		return renderSuccess();
 	}
 
-
-
 	@Mapping("setOrder")
 	public JsonResult setOrder(String id, Integer count) {
 		httpService.setSeq(id, count);
+		return renderSuccess();
+	}
+
+	@Mapping("setEnable")
+	public JsonResult setEnable(Http http) {
+		sqlHelper.updateById(http);
 		return renderSuccess();
 	}
 }

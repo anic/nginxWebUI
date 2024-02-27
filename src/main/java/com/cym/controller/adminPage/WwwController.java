@@ -3,6 +3,7 @@ package com.cym.controller.adminPage;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import cn.hutool.core.util.StrUtil;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -37,11 +38,13 @@ public class WwwController extends BaseController {
 
 	@Mapping("addOver")
 	public JsonResult addOver(Www www, String dirTemp) {
-		if (wwwService.hasDir(www.getDir(),www.getId())) {
+		if (wwwService.hasDir(www.getDir(), www.getId())) {
 			return renderError(m.get("wwwStr.sameDir"));
 		}
 
 		try {
+			FileUtil.clean(www.getDir());
+
 			try {
 				ZipUtil.unzip(dirTemp, www.getDir());
 			} catch (Exception e) {
@@ -61,8 +64,6 @@ public class WwwController extends BaseController {
 		return renderError(m.get("wwwStr.zipError"));
 	}
 
-
-
 	@Mapping("del")
 	public JsonResult del(String id) {
 		sqlHelper.deleteById(id, Www.class);
@@ -77,7 +78,7 @@ public class WwwController extends BaseController {
 		return renderSuccess(www);
 	}
 
-	public String getClassPath() throws Exception {
+	public String getClassPath() {
 		try {
 			String strClassName = getClass().getName();
 			String strPackageName = "";
@@ -85,7 +86,7 @@ public class WwwController extends BaseController {
 				strPackageName = getClass().getPackage().getName();
 			}
 			String strClassFileName = "";
-			if (!"".equals(strPackageName)) {
+			if (StrUtil.isNotBlank(strPackageName)) {
 				strClassFileName = strClassName.substring(strPackageName.length() + 1, strClassName.length());
 			} else {
 				strClassFileName = strClassName;
@@ -101,5 +102,21 @@ public class WwwController extends BaseController {
 			logger.error(e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	@Mapping("getDescr")
+	public JsonResult getDescr(String id) {
+		Www www = sqlHelper.findById(id, Www.class);
+		return renderSuccess(www.getDescr());
+	}
+
+	@Mapping("editDescr")
+	public JsonResult editDescr(String id, String descr) {
+		Www www = new Www();
+		www.setId(id);
+		www.setDescr(descr);
+		sqlHelper.updateById(www);
+
+		return renderSuccess();
 	}
 }

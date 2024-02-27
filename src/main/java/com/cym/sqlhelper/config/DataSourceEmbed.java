@@ -11,7 +11,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Component
-public class DataSourceEmbed {
+public class DataSourceEmbed  {
 	@Inject
 	HomeConfig homeConfig;
 	@Inject("${spring.database.type}")
@@ -26,7 +26,7 @@ public class DataSourceEmbed {
 	DataSource dataSource;
 
 	@Init
-	public void init() {
+	public void afterInjection()  {
 		// 创建dataSource
 		if (databaseType.equalsIgnoreCase("sqlite") || databaseType.equalsIgnoreCase("h2")) {
 			HikariConfig dbConfig = new HikariConfig();

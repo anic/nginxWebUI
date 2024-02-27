@@ -1,12 +1,17 @@
 package com.cym.controller.adminPage;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
+import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
+import org.noear.solon.core.handle.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +20,7 @@ import com.cym.model.Cert;
 import com.cym.model.Http;
 import com.cym.model.Location;
 import com.cym.model.Password;
+import com.cym.model.Remote;
 import com.cym.model.Server;
 import com.cym.model.Stream;
 import com.cym.model.Upstream;
@@ -39,6 +45,7 @@ import com.github.odiszapc.nginxparser.NgxParam;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 
 @Controller
@@ -80,6 +87,7 @@ public class ServerController extends BaseController {
 				serverExt.setLocationStr(m.get("serverStr.server") + ": " + (upstream != null ? upstream.getName() : ""));
 			}
 
+			serverExt.setHref((server.getSsl() == 1 ? "https" : "http") + ("://" + server.getServerName() + ":" + server.getListen()));
 			exts.add(serverExt);
 		}
 		page.setRecords(exts);
@@ -158,11 +166,7 @@ public class ServerController extends BaseController {
 		}
 
 		if (server.getProxyType() == 0) {
-			try {
-				serverService.addOver(server, serverParamJson, locations);
-			} catch (Exception e) {
-				return renderError(e.getMessage());
-			}
+			serverService.addOver(server, serverParamJson, locations);
 		} else {
 			serverService.addOverTcp(server, serverParamJson);
 		}
@@ -185,11 +189,11 @@ public class ServerController extends BaseController {
 		List<Location> list = serverService.getLocationByServerId(id);
 		for (Location location : list) {
 			String json = paramService.getJsonByTypeId(location.getId(), "location");
-			location.setLocationParamJson(json != null ? json : null);
+			location.setLocationParamJson(json);
 		}
 		serverExt.setLocationList(list);
 		String json = paramService.getJsonByTypeId(server.getId(), "server");
-		serverExt.setParamJson(json != null ? json : null);
+		serverExt.setParamJson(json);
 
 		return renderSuccess(serverExt);
 	}
@@ -200,14 +204,6 @@ public class ServerController extends BaseController {
 
 		return renderSuccess();
 	}
-
-//	@Mapping("clone")
-//	
-//	public JsonResult clone(String id) {
-//		serverService.clone(id);
-//
-//		return renderSuccess();
-//	}
 
 	@Mapping("importServer")
 	public JsonResult importServer(String nginxPath) {
@@ -243,8 +239,17 @@ public class ServerController extends BaseController {
 				port = server.getListen();
 			}
 
-			if (TelnetUtils.isRunning(ip, Integer.parseInt(port)) && !ips.contains(server.getListen())) {
-				ips.add(server.getListen());
+			// 如果是范围端口,只检测第一个
+			if (port.contains("-")) {
+				port = port.split("-")[0];
+			}
+
+			try {
+				if (TelnetUtils.isRunning(ip, Integer.parseInt(port)) && !ips.contains(server.getListen())) {
+					ips.add(server.getListen());
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 
@@ -280,6 +285,10 @@ public class ServerController extends BaseController {
 			ngxBlock = new NgxBlock();
 			ngxBlock.addValue("http");
 			for (Http http : httpList) {
+				if (http.getEnable() == null || !http.getEnable()) {
+					continue;
+				}
+
 				NgxParam ngxParam = new NgxParam();
 				ngxParam.addValue(http.getName().trim() + " " + http.getValue().trim());
 				ngxBlock.addEntry(ngxParam);
@@ -313,14 +322,13 @@ public class ServerController extends BaseController {
 		Server server = sqlHelper.findById(id, Server.class);
 		return renderSuccess(server.getDescr());
 	}
-	
+
 	@Mapping("getLocationDescr")
 	public JsonResult getLocationDescr(String id) {
 		Location location = sqlHelper.findById(id, Location.class);
 		return renderSuccess(location.getDescr());
 	}
-	
-	
+
 	@Mapping("setLocationDescr")
 	public JsonResult setLocationDescr(String id, String descr) {
 		Location location = new Location();
@@ -330,6 +338,38 @@ public class ServerController extends BaseController {
 
 		return renderSuccess();
 	}
-	
-	
+
+	@Mapping("upload")
+	public JsonResult upload(Context context, UploadedFile file) {
+		try {
+			File temp = new File(FileUtil.getTmpDir() + File.separator + file.getName().replace("..", ""));
+			file.transferTo(temp);
+
+			// 移动文件
+			File dest = new File(homeConfig.home + "cert/" + file.getName().replace("..", ""));
+			while (FileUtil.exist(dest)) {
+				dest = new File(dest.getPath() + "_1");
+			}
+			FileUtil.move(temp, dest, true);
+
+			String localType = (String) context.session("localType");
+			if ("remote".equals(localType)) {
+				Remote remote = (Remote) context.session("remote");
+
+				HashMap<String, Object> paramMap = new HashMap<>();
+				paramMap.put("file", temp);
+
+				String rs = HttpUtil.post(remote.getProtocol() + "://" + remote.getIp() + ":" + remote.getPort() + "/upload", paramMap);
+				JsonResult jsonResult = JSONUtil.toBean(rs, JsonResult.class);
+				FileUtil.del(temp);
+				return jsonResult;
+			}
+
+			return renderSuccess(dest.getPath().replace("\\", "/"));
+		} catch (IllegalStateException | IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+
+		return renderError();
+	}
 }

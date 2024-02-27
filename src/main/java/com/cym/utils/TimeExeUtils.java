@@ -1,22 +1,22 @@
 package com.cym.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
-
+import cn.hutool.core.util.ArrayUtil;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class TimeExeUtils {
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Inject
 	MessageUtils m;
-	
 
 	/**
 	 * 命令执行
@@ -30,13 +30,15 @@ public class TimeExeUtils {
 		Process process = null;
 		StringBuilder sbStd = new StringBuilder();
 
-		long start = System.currentTimeMillis() ;
+		String[] allEnvs = ArrayUtil.addAll(System.getenv() //
+				.entrySet()//
+				.stream()//
+				.map(r -> String.format("%s=%s", r.getKey(), r.getValue()))//
+				.toArray(String[]::new), envs);
+
+		long start = System.currentTimeMillis();
 		try {
-			if (envs == null) {
-				process = Runtime.getRuntime().exec(cmd);
-			} else {
-				process = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", cmd }, envs);
-			}
+			process = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", cmd }, allEnvs);
 
 			BufferedReader brStd = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line = null;
@@ -44,7 +46,7 @@ public class TimeExeUtils {
 			while (true) {
 				if (brStd.ready()) {
 					line = brStd.readLine();
-					sbStd.append(line + "\n");
+					sbStd.append(line).append("\n");
 					logger.info(line);
 					continue;
 				}
@@ -54,14 +56,14 @@ public class TimeExeUtils {
 						process.exitValue();
 						break;
 					} catch (IllegalThreadStateException e) {
-						System.err.println(e.getMessage());
+						//System.err.println(e.getMessage());
 					}
 				}
 
-				if (System.currentTimeMillis()  - start > timeout) {
-					line = m.get("certStr.timeout"); 
-					
-					sbStd.append(line + "\n");
+				if (System.currentTimeMillis() - start > timeout) {
+					line = m.get("certStr.timeout");
+
+					sbStd.append(line).append("\n");
 					logger.info(line);
 					break;
 				}
@@ -69,6 +71,7 @@ public class TimeExeUtils {
 				try {
 					TimeUnit.MILLISECONDS.sleep(500);
 				} catch (InterruptedException e) {
+					//System.err.println(e.getMessage());
 				}
 			}
 		} catch (IOException e) {

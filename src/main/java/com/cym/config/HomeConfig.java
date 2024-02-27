@@ -15,25 +15,24 @@ import com.cym.utils.ToolUtils;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 
 @Component
-public class HomeConfig {
+public class HomeConfig  {
 	@Inject("${project.home}")
 	public String home;
 	public String acmeShDir;
 	public String acmeSh;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Init
-	public void init() {
+	public void afterInjection() {
 		if (StrUtil.isEmpty(home)) {
 			// 获取jar位置
 			File file = new File(JarUtil.getCurrentFilePath());
 
 			if (file.getPath().contains("target") && file.getPath().contains("classes")) {
-				home = FileUtil.getUserHomePath() + File.separator + "svnWebUI";
+				home = FileUtil.getUserHomePath() + File.separator + "nginxWebUI";
 			} else {
 				home = file.getParent();
 			}

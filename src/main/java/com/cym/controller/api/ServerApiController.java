@@ -5,6 +5,7 @@ import java.util.List;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
+import org.noear.solon.annotation.Param;
 
 import com.cym.model.Location;
 import com.cym.model.Server;
@@ -37,8 +38,8 @@ public class ServerApiController extends BaseController {
 	 * 
 	 */
 	@Mapping("getPage")
-	public JsonResult<Page<Server>> getPage(Integer current, //
-			Integer limit, //
+	public JsonResult<Page<Server>> getPage(@Param(defaultValue = "1") Integer current, //
+			@Param(defaultValue = "10") Integer limit, //
 			String keywords) {
 		Page page = new Page();
 		page.setCurr(current);
@@ -91,7 +92,7 @@ public class ServerApiController extends BaseController {
 		List<Location> locationList = serverService.getLocationByServerId(serverId);
 		for (Location location : locationList) {
 			String json = paramService.getJsonByTypeId(location.getId(), "location");
-			location.setLocationParamJson(json != null ? json : null);
+			location.setLocationParamJson(json);
 		}
 		return renderSuccess(locationList);
 	}

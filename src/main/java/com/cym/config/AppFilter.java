@@ -4,10 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,22 +66,25 @@ public class AppFilter implements Filter {
 
 	@Override
 	public void doFilter(Context ctx, FilterChain chain) throws Throwable {
+
+		String path = ctx.path().toLowerCase();
+
 		// 全局过滤器
-		if (!ctx.path().contains("/lib/") //
-				&& !ctx.path().contains("/js/") //
-				&& !ctx.path().contains("/doc/") //
-				&& !ctx.path().contains("/img/") //
-				&& !ctx.path().contains("/css/")) {
+		if (!path.contains("/lib/") //
+				&& !path.toLowerCase().contains("/js/") //
+				&& !path.toLowerCase().contains("/doc/") //
+				&& !path.toLowerCase().contains("/img/") //
+				&& !path.toLowerCase().contains("/css/")) {
 			frontInterceptor(ctx);
 		}
 
 		// 登录过滤器
-		if (ctx.path().contains("/adminPage/") //
-				&& !ctx.path().contains("/lib/") //
-				&& !ctx.path().contains("/doc/") //
-				&& !ctx.path().contains("/js/") //
-				&& !ctx.path().contains("/img/") //
-				&& !ctx.path().contains("/css/")) {
+		if (path.toLowerCase().contains("/adminPage/".toLowerCase()) //
+				&& !path.contains("/lib/") //
+				&& !path.contains("/doc/") //
+				&& !path.contains("/js/") //
+				&& !path.contains("/img/") //
+				&& !path.contains("/css/")) {
 			if (!adminInterceptor(ctx)) {
 				// 设置为已处理
 				ctx.setHandled(true);
@@ -91,12 +93,12 @@ public class AppFilter implements Filter {
 		}
 
 		// api过滤器
-		if (ctx.path().contains("/api/") //
-				&& !ctx.path().contains("/lib/") //
-				&& !ctx.path().contains("/doc/") //
-				&& !ctx.path().contains("/js/") //
-				&& !ctx.path().contains("/img/") //
-				&& !ctx.path().contains("/css/")) {
+		if (path.toLowerCase().contains("/api/") //
+				&& !path.contains("/lib/") //
+				&& !path.contains("/doc/") //
+				&& !path.contains("/js/") //
+				&& !path.contains("/img/") //
+				&& !path.contains("/css/")) {
 			if (!apiInterceptor(ctx)) {
 				// 设置为已处理
 				ctx.setHandled(true);
@@ -130,12 +132,12 @@ public class AppFilter implements Filter {
 	private boolean adminInterceptor(Context ctx) {
 		String ctxStr = getCtxStr(ctx);
 
-		if (ctx.path().contains("adminPage/login")) {
+		if (ctx.path().toLowerCase().contains("adminPage/login".toLowerCase())) {
 			return true;
 		}
 
 		String creditKey = ctx.param("creditKey");
-		Boolean isCredit = creditService.check(creditKey);
+		boolean isCredit = creditService.check(creditKey);
 
 		Boolean isLogin = (Boolean) ctx.session("isLogin");
 		if (!((isLogin != null && isLogin) || isCredit)) {
@@ -146,9 +148,9 @@ public class AppFilter implements Filter {
 		String localType = (String) ctx.session("localType");
 		if (localType != null //
 				&& localType.equals("remote") //
-				&& !ctx.path().contains("adminPage/remote") //
-				&& !ctx.path().contains("adminPage/admin") //
-				&& !ctx.path().contains("adminPage/about") //
+				&& !ctx.path().toLowerCase().contains("adminPage/remote".toLowerCase()) //
+				&& !ctx.path().toLowerCase().contains("adminPage/admin".toLowerCase()) //
+				&& !ctx.path().toLowerCase().contains("adminPage/about".toLowerCase()) //
 		) {
 			// 转发到远程服务器
 			Remote remote = (Remote) ctx.session("remote");
@@ -163,7 +165,7 @@ public class AppFilter implements Filter {
 
 					UploadedFile uploadedFile = ctx.file("file");
 
-					File temp = new File(FileUtil.getTmpDir() + "/" + uploadedFile.name);
+					File temp = new File(FileUtil.getTmpDir() + "/" + uploadedFile.getName());
 					uploadedFile.transferTo(temp);
 					map.put("file", temp);
 
@@ -179,13 +181,13 @@ public class AppFilter implements Filter {
 				ctx.charset("utf-8");
 				ctx.contentType("text/html;charset=utf-8");
 
-				if (JSONUtil.isJson(rs)) {
+				if (JSONUtil.isTypeJSON(rs)) {
 					String date = DateUtil.format(new Date(), "yyyy-MM-dd_HH-mm-ss");
-					ctx.header("Content-Type", "application/octet-stream");
-					ctx.header("content-disposition", "attachment;filename=" + URLEncoder.encode(date + ".json", "UTF-8")); // 设置文件名
+					ctx.headerOrDefault("Content-Type", "application/octet-stream");
+					ctx.headerOrDefault("content-disposition", "attachment;filename=" + URLEncoder.encode(date + ".json", "UTF-8")); // 设置文件名
 
 					byte[] buffer = new byte[1024];
-					BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(rs.getBytes(Charset.forName("UTF-8"))));
+					BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(rs.getBytes(StandardCharsets.UTF_8)));
 					OutputStream os = ctx.outputStream();
 					int i = bis.read(buffer);
 					while (i != -1) {
@@ -226,7 +228,10 @@ public class AppFilter implements Filter {
 		if (versionConfig.newVersion != null) {
 			ctx.attrSet("newVersion", versionConfig.newVersion);
 
-			if (Integer.parseInt(versionConfig.currentVersion.replace(".", "").replace("v", "")) < Integer.parseInt(versionConfig.newVersion.getVersion().replace(".", "").replace("v", ""))) {
+			int currentVersion = Integer.parseInt(versionConfig.currentVersion.replace(".", "").replace("v", ""));
+			int newVersion = Integer.parseInt(versionConfig.newVersion.getVersion().replace(".", "").replace("v", ""));
+
+			if (currentVersion < newVersion) {
 				ctx.attrSet("hasNewVersion", 1);
 			}
 		}

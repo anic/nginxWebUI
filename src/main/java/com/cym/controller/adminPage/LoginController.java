@@ -3,6 +3,8 @@ package com.cym.controller.adminPage;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JPanel;
+
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -25,6 +27,7 @@ import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.base.Captcha;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
 
 /**
@@ -57,8 +60,15 @@ public class LoginController extends BaseController {
 	@Mapping("loginOut")
 	public ModelAndView loginOut(ModelAndView modelAndView) {
 
+		Admin admin = (Admin) Context.current().session("admin");
+		// 将自动登录key设为空
+		admin = sqlHelper.findById(admin.getId(), Admin.class);
+		admin.setAutoKey(null);
+		sqlHelper.updateAllColumnById(admin);
+
 		Context.current().sessionRemove(("isLogin"));
-		;
+		Context.current().sessionRemove("admin");
+
 		modelAndView.view("/adminPage/index.html");
 		return modelAndView;
 	}
@@ -69,8 +79,25 @@ public class LoginController extends BaseController {
 		return modelAndView;
 	}
 
+	/**
+	 * 判断参数长度是否大于1000
+	 * 
+	 * @param param
+	 * @return
+	 */
+	private boolean testLenth(String param) {
+		if (StrUtil.isNotEmpty(param) && param.length() > 1000) {
+			return true;
+		}
+		return false;
+	}
+
 	@Mapping("login")
-	public JsonResult submitLogin(String name, String pass, String code, String authCode, String remember) {
+	public JsonResult submitLogin(String name, String pass, String code, String authCode) {
+		if (testLenth(name) || testLenth(pass) || testLenth(code) || testLenth(authCode)) {
+			return renderError(m.get("loginStr.backError7"));
+		}
+
 		// 解码
 		if (StrUtil.isNotEmpty(name)) {
 			name = Base64.decodeStr(Base64.decodeStr(name));
@@ -105,6 +132,9 @@ public class LoginController extends BaseController {
 		}
 
 		// 登录成功
+		admin.setAutoKey(UUID.randomUUID().toString()); // 生成自动登录code
+		sqlHelper.updateById(admin);
+
 		Context.current().sessionSet("localType", "local");
 		Context.current().sessionSet("isLogin", true);
 		Context.current().sessionSet("admin", admin);
@@ -117,10 +147,10 @@ public class LoginController extends BaseController {
 	}
 
 	@Mapping("autoLogin")
-	public JsonResult autoLogin(String adminId) {
+	public JsonResult autoLogin(String autoKey) {
 
 		// 用户名密码
-		Admin admin = sqlHelper.findById(adminId, Admin.class);
+		Admin admin = adminService.getByAutoKey(autoKey);
 		if (admin != null) {
 			// 登录成功
 			Context.current().sessionSet("localType", "local");
@@ -140,6 +170,9 @@ public class LoginController extends BaseController {
 
 	@Mapping("getAuth")
 	public JsonResult getAuth(String name, String pass, String code, Integer remote) {
+		if (testLenth(name) || testLenth(pass) || testLenth(code)) {
+			return renderError(m.get("loginStr.backError7"));
+		}
 
 		// 解码
 		if (StrUtil.isNotEmpty(name)) {
@@ -175,6 +208,10 @@ public class LoginController extends BaseController {
 
 	@Mapping("getCredit")
 	public JsonResult getCredit(String name, String pass, String code, String auth) {
+		if (testLenth(name) || testLenth(pass) || testLenth(code)) {
+			return renderError(m.get("loginStr.backError7"));
+		}
+
 		// 解码
 		if (StrUtil.isNotEmpty(name)) {
 			name = Base64.decodeStr(Base64.decodeStr(name));

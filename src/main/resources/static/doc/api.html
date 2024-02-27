@@ -6,7 +6,7 @@
     <meta name="generator" content="smart-doc">
     <title>nginxWebUI</title>
     <link rel="stylesheet" href="font.css">
-    <link rel="stylesheet" href="AllInOne.css?v=1646038809454"/>
+    <link rel="stylesheet" href="AllInOne.css?v=1701413184079"/>
     
     <style>.literalblock pre, .listingblock pre:not(.highlight), .listingblock pre[class="highlight"], .listingblock pre[class^="highlight "], .listingblock pre.CodeRay, .listingblock pre.prettyprint {
         background: #f7f7f8;
@@ -227,7 +227,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;获取Http参数</p></div>
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
@@ -307,6 +307,13 @@
                         <td class="tableblock halign-left valign-top"><p class="tableblock">参数单位</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">└─enable</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">是否启用 true:启用(默认) false:禁用</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
                     </tbody>
                 </table>
                 <div class="paragraph"><p><strong>Response-example:</strong></p></div>
@@ -314,14 +321,15 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "ckmh1s",
-  "msg": "mz4ahg",
+  "status": "",
+  "msg": "",
   "obj": [
     {
-      "id": "87",
-      "name": "georgianna.stracke",
-      "value": "s3w3u1",
-      "unit": "zx9khn"
+      "id": "",
+      "name": "",
+      "value": "",
+      "unit": "",
+      "enable": true
     }
   ]
 }</code></pre>
@@ -337,9 +345,9 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;添加或编辑Http参数</p></div>
-                <div class="paragraph"><p><strong>Body-parameters:</strong></p></div>
+                <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
                     <colgroup>
                         <col style="width: 20%;">
@@ -389,12 +397,20 @@
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">enable</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">是否启用 true:启用(默认) false:禁用</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
                     </tbody>
                 </table>
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateHttp?unit=6m0dk6&id=87&seq=145&name=georgianna.stracke&createTime=1646038811217&updateTime=1646038811217&value=q2p581</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateHttp?enable=true&unit=&value=&name=&id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -469,6 +485,13 @@
                         <td class="tableblock halign-left valign-top"><p class="tableblock">参数单位</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">└─enable</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">是否启用 true:启用(默认) false:禁用</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
                     </tbody>
                 </table>
                 <div class="paragraph"><p><strong>Response-example:</strong></p></div>
@@ -476,13 +499,14 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "7ojaua",
-  "msg": "0nnupk",
+  "status": "",
+  "msg": "",
   "obj": {
-    "id": "87",
-    "name": "georgianna.stracke",
-    "value": "rap88v",
-    "unit": "urta8t"
+    "id": "",
+    "name": "",
+    "value": "",
+    "unit": "",
+    "enable": true
   }
 }</code></pre>
                     </div>
@@ -497,7 +521,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;删除Http参数</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -530,7 +554,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/delHttp?id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/delHttp?id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -584,8 +608,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "f1clg7",
-  "msg": "oq31yj",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -600,7 +624,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;获取基础参数</p></div>
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
@@ -680,13 +704,13 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "7tgm0k",
-  "msg": "cz1deh",
+  "status": "",
+  "msg": "",
   "obj": [
     {
-      "id": "87",
-      "name": "georgianna.stracke",
-      "value": "b8h348"
+      "id": "",
+      "name": "",
+      "value": ""
     }
   ]
 }</code></pre>
@@ -702,9 +726,9 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;添加或编辑基础参数</p></div>
-                <div class="paragraph"><p><strong>Body-parameters:</strong></p></div>
+                <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
                     <colgroup>
                         <col style="width: 20%;">
@@ -751,7 +775,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateBasic?seq=416&createTime=1646038811217&name=georgianna.stracke&updateTime=1646038811217&value=9z5azd&id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateBasic?value=&id=&name=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -826,12 +850,12 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "q0lgcq",
-  "msg": "395b1j",
+  "status": "",
+  "msg": "",
   "obj": {
-    "id": "87",
-    "name": "georgianna.stracke",
-    "value": "5yyru4"
+    "id": "",
+    "name": "",
+    "value": ""
   }
 }</code></pre>
                     </div>
@@ -846,7 +870,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;删除基础参数</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -879,7 +903,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/delBasic?id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/delBasic?id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -933,8 +957,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "xj6wz0",
-  "msg": "9yurss",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -949,7 +973,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;获取Stream参数</p></div>
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
@@ -1029,13 +1053,13 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "52t6fs",
-  "msg": "rn46nh",
+  "status": "",
+  "msg": "",
   "obj": [
     {
-      "id": "87",
-      "name": "georgianna.stracke",
-      "value": "ogx0yg"
+      "id": "",
+      "name": "",
+      "value": ""
     }
   ]
 }</code></pre>
@@ -1051,9 +1075,9 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;添加或编辑Stream参数</p></div>
-                <div class="paragraph"><p><strong>Body-parameters:</strong></p></div>
+                <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
                     <colgroup>
                         <col style="width: 20%;">
@@ -1100,7 +1124,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateStream?name=georgianna.stracke&updateTime=1646038811217&createTime=1646038811217&seq=221&id=87&value=dfxuej</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/insertOrUpdateStream?name=&id=&value=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1175,12 +1199,12 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "ffe1f9",
-  "msg": "ijejwp",
+  "status": "",
+  "msg": "",
   "obj": {
-    "id": "87",
-    "name": "georgianna.stracke",
-    "value": "320tyn"
+    "id": "",
+    "name": "",
+    "value": ""
   }
 }</code></pre>
                     </div>
@@ -1195,7 +1219,7 @@
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
                 <div class="paragraph"><p><strong>Author:</strong>&nbsp;CYM</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;删除Stream参数</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -1228,7 +1252,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/basic/delStream?id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/basic/delStream?id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1282,8 +1306,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "g854hj",
-  "msg": "djkqi3",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -1291,12 +1315,12 @@
             </div>
         </div>
     </div>
-    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2022-02-28 17:00:09</span><span
+    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2023-12-01 14:46:24</span><span
             class="footer-modification">Suggestions,contact,support and error reporting on<a
             href="https://gitee.com/smart-doc-team/smart-doc" target="_blank">&nbsp;Gitee</a>&nbsp;or<a
             href="https://github.com/smart-doc-group/smart-doc.git" target="_blank">&nbsp;Github</a></span></footer>
 </div>
-<script src="search.js?v=1646038809454"></script>
+<script src="search.js?v=1701413184079"></script>
 <script>
     $(function () {
         const Accordion = function (el, multiple) {

@@ -1,8 +1,9 @@
 server:
   port: 8080
   request:
-    maxBodySize: 2048mb
-    maxHeaderSize: 20mb
+    maxBodySize: 20mb
+    maxFileSize: 2048mb
+    maxHeaderSize: 200kb
 
 project:
   sqlPrint: false
@@ -19,6 +20,14 @@ solon:
   logging:
     logger:
       "io.undertow":
+        level: "WARN"
+      "org.xnio":
+        level: "WARN"
+      "o.xnio":
+        level: "WARN"
+      "com.zaxxer.hikari":
+        level: "WARN"
+      "org.jboss":
         level: "WARN"
     appender:
       file:

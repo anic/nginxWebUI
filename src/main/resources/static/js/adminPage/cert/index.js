@@ -32,7 +32,8 @@ $(function() {
 				// 上传完毕回调
 				if (res.success) {
 					$("#pem").val(res.obj);
-					$("#pemPath").html(res.obj);
+					var path = res.obj.split('/');
+					$("#pemPath").html(path[path.length - 1]);
 				}
 
 			},
@@ -49,13 +50,27 @@ $(function() {
 				// 上传完毕回调
 				if (res.success) {
 					$("#key").val(res.obj);
-					$("#keyPath").html(res.obj);
+					var path = res.obj.split('/');
+					$("#keyPath").html(path[path.length - 1]);
 				}
 			},
 			error: function() {
 				// 请求异常回调
 			}
 		});
+	});
+	
+	
+	layui.use('laydate', function() {
+		layui.laydate.render({
+			elem: '#makeTime, #endTime',
+			type: 'datetime',
+			format: 'yyyy-MM-dd HH:mm:ss'
+		});
+	})
+
+	layui.use('util', function() {
+
 	});
 
 	form.on('select(dnsType)', function(data) {
@@ -86,7 +101,7 @@ function checkType(value) {
 	$("#type0").hide();
 	$("#type1").hide();
 	$("#encryptionDiv").hide();
-	
+
 	if (value == 0) {
 		$("#type0").show();
 		$("#encryptionDiv").show();
@@ -94,7 +109,7 @@ function checkType(value) {
 	if (value == 1) {
 		$("#type1").show();
 	}
-	
+
 	if (value == 2) {
 		$("#encryptionDiv").show();
 	}
@@ -117,7 +132,6 @@ function add() {
 
 	$("#hwUsername").val("");
 	$("#hwPassword").val("");
-	$("#hwProjectId").val("");
 	$("#hwDomainName").val("");
 
 	$("#pem").val("");
@@ -128,13 +142,19 @@ function add() {
 	$("#domain").attr("disabled", false);
 	$("#domain").removeClass("disabled");
 	$("#type").attr("disabled", false);
-					
+	$("#encryption").attr("disabled", false);
+	$("#encryption").removeClass("disabled");
+
+	$("#makeTime").val("");
+	$("#endTime").val("");
+
 	checkType(0);
 	checkDnsType('ali');
 
 	form.render();
 	showWindow(certStr.add);
 }
+
 
 
 function edit(id, clone) {
@@ -152,33 +172,30 @@ function edit(id, clone) {
 			if (data.success) {
 
 				var cert = data.obj;
-				
+
 				$("#domain").val(cert.domain);
 				$("#type").val(cert.type);
 				$("#dnsType").val(cert.dnsType != null ? cert.dnsType : 'ali');
-				$("#encryption").val(cert.encryption != null ? cert.encryption : 'RAS');
+				$("#encryption").val(cert.encryption != null ? cert.encryption : 'RSA');
 				$("#aliKey").val(cert.aliKey);
 				$("#aliSecret").val(cert.aliSecret);
 				$("#dpId").val(cert.dpId);
 				$("#dpKey").val(cert.dpKey);
 				$("#cfEmail").val(cert.cfEmail);
 				$("#cfKey").val(cert.cfKey);
+
 				$("#gdKey").val(cert.gdKey);
 				$("#gdSecret").val(cert.gdSecret);
 
 				$("#hwUsername").val(cert.hwUsername);
 				$("#hwPassword").val(cert.hwPassword);
-				$("#hwProjectId").val(cert.hwProjectId);
 				$("#hwDomainName").val(cert.hwDomainName);
-				
-				$("#pemPath").html(cert.pem);
-				$("#keyPath").html(cert.key);
-				
-				if(!clone){
+
+				if (!clone) {
 					$("#domain").attr("disabled", true);
 					$("#domain").addClass("disabled");
-					
-					if(cert.pem!=null && cert.pem!='' && cert.key!=null && cert.key!=''){
+
+					if (cert.pem != null && cert.pem != '' && cert.key != null && cert.key != '') {
 						$("#type").attr("disabled", true);
 						$("#encryption").attr("disabled", true);
 						$("#encryption").addClass("disabled");
@@ -187,22 +204,37 @@ function edit(id, clone) {
 						$("#encryption").attr("disabled", false);
 						$("#encryption").removeClass("disabled");
 					}
-					
+
 					$("#id").val(cert.id);
 					$("#pem").val(cert.pem);
 					$("#key").val(cert.key);
+					var path = cert.pem.split('/');
+					$("#pemPath").html(path[path.length - 1]);
+					path = cert.key.split('/');
+					$("#keyPath").html(path[path.length - 1]);
+
+					if (cert.makeTime != null) {
+						$("#makeTime").val(layui.util.toDateString(cert.makeTime, 'yyyy-MM-dd HH:mm:ss'));
+					}
+					if (cert.endTime != null) {
+						$("#endTime").val(layui.util.toDateString(cert.endTime, 'yyyy-MM-dd HH:mm:ss'));
+					}
 				} else {
 					$("#domain").attr("disabled", false);
 					$("#domain").removeClass("disabled");
 					$("#encryption").attr("disabled", false);
 					$("#encryption").removeClass("disabled");
 					$("#type").attr("disabled", false);
-					
+
 					$("#id").val("");
 					$("#pem").val("");
 					$("#key").val("");
+					$("#pemPath").html("");
+					$("#keyPath").html("");
+					$("#makeTime").val("");
+					$("#endTime").val("");
 				}
-				
+
 				checkType(cert.type);
 				checkDnsType(cert.dnsType != null ? cert.dnsType : 'ali');
 
@@ -223,7 +255,7 @@ function showWindow(title) {
 	layer.open({
 		type: 1,
 		title: title,
-		area: ['1000px', '560px'], // 宽高
+		area: ['1000px', '630px'], // 宽高
 		content: $('#windowDiv')
 	});
 }
@@ -260,11 +292,24 @@ function addOver() {
 			}
 		}
 		if ($("#dnsType").val() == 'hw') {
-			if ($("#hwUsername").val() == '' || $("#hwPassword").val() == '' || $("#hwProjectId").val() == '') {
+			if ($("#hwUsername").val() == '' || $("#hwPassword").val() == '' || $("#hwDomainName").val() == '') {
 				layer.msg(commonStr.IncompleteEntry);
 				return;
 			}
 		}
+	}
+
+	if ($("#type").val() == 1 && $("#pem").val() == $("#key").val()) {
+		layer.msg(certStr.error5);
+		return;
+	}
+
+	// 将时间字段的值转换为时间戳
+	if ($("#makeTime").val() !== '') {
+		$("#makeTime").val(new Date($("#makeTime").val()).getTime());
+	}
+	if ($("#endTime").val() !== '') {
+		$("#endTime").val(new Date($("#endTime").val()).getTime());
 	}
 
 	$.ajax({
@@ -344,14 +389,14 @@ function issue(id) {
 							`;
 						}
 						$("#notice").html(html);
-						
+
 						layer.open({
 							type: 1,
 							title: certStr.hostRecords,
 							area: ['900px', '400px'], // 宽高
 							content: $('#txtDiv')
 						});
-						
+
 					}
 
 				} else {
@@ -436,44 +481,47 @@ function clone(id) {
 
 
 function getTxtValue(id) {
-	
-	$.ajax({
-		type: 'POST',
-		url: ctx + '/adminPage/cert/getTxtValue',
-		data: {
-			id: id
-		},
-		dataType: 'json',
-		success: function(data) {
-			if (data.success) {
-				var html = ``;
+	if (confirm(certStr.hostRecords)) {
+		showLoad();
+		$.ajax({
+			type: 'POST',
+			url: ctx + '/adminPage/cert/getTxtValue',
+			data: {
+				id: id
+			},
+			dataType: 'json',
+			success: function(data) {
+				closeLoad();
+				if (data.success) {
+					var html = ``;
 
-				for (let i = 0; i < data.obj.length; i++) {
-					var map = data.obj[i]
-					html += `
+					for (let i = 0; i < data.obj.length; i++) {
+						var map = data.obj[i]
+						html += `
 						<tr>
 							<td>${map.domain} <input type="hidden" name="domains" value="${map.domain}"> </td>
 							<td>${map.type} <input type="hidden" name="types" value="${map.type}"> </td>
 							<td>${map.value} <input type="hidden" name="values" value="${map.value}"> </td>
 						</tr>
 					`;
-				}
+					}
 
-				$("#notice").html(html);
-				
-				layer.open({
-					type: 1,
-					title: certStr.hostRecords,
-					area: ['900px', '400px'], // 宽高
-					content: $('#txtDiv')
-				});
-			} else {
-				layer.msg(data.msg);
+					$("#notice").html(html);
+
+					layer.open({
+						type: 1,
+						title: certStr.hostRecords,
+						area: ['900px', '400px'], // 宽高
+						content: $('#txtDiv')
+					});
+				} else {
+					layer.alert(data.msg);
+				}
+			},
+			error: function() {
+				layer.closeAll();
+				layer.alert(commonStr.errorInfo);
 			}
-		},
-		error: function() {
-			layer.closeAll();
-			layer.alert(commonStr.errorInfo);
-		}
-	});
+		});
+	}
 }

@@ -1,7 +1,6 @@
 package com.cym.config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +10,7 @@ import java.util.Properties;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.noear.solon.annotation.Configuration;
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Init;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 
-@Configuration
-public class VersionConfig {
+@Component
+public class VersionConfig  {
 	Logger logger = LoggerFactory.getLogger(VersionConfig.class);
 
 	public Version newVersion;
@@ -32,7 +31,11 @@ public class VersionConfig {
 	public String currentVersion;
 
 	@Init
-	public void checkVersion() {
+	public void afterInjection() {
+		checkVersion();
+	}
+
+	public void checkVersion(){
 		// 获取版本号
 		try {
 			currentVersion = getFromPom();
@@ -50,10 +53,9 @@ public class VersionConfig {
 			logger.error("更新服务器不可访问");
 
 		}
-
 	}
 
-	public String getFromPom() throws FileNotFoundException, IOException, XmlPullParserException {
+	public String getFromPom() throws IOException, XmlPullParserException {
 
 		// 查看jar包里面pom.properties版本号
 		String jarPath = VersionConfig.class.getProtectionDomain().getCodeSource().getLocation().getFile();

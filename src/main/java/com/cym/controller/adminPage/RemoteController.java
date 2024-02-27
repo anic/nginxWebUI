@@ -95,7 +95,7 @@ public class RemoteController extends BaseController {
 	}
 
 	@Mapping("allTable")
-	public List<Remote> allTable() {
+	public List<Remote> allTable(Context context) {
 		Admin admin = getAdmin();
 		List<Remote> remoteList = sqlHelper.findAll(Remote.class);
 
@@ -104,6 +104,14 @@ public class RemoteController extends BaseController {
 			remote.setType(0);
 			if (remote.getParentId() == null) {
 				remote.setParentId("");
+			}
+
+			remote.setSelect(false);
+			if (context.session("localType").equals("remote")) {
+				Remote remoteSession = (Remote) context.session("remote");
+				if (remoteSession.getId().equals(remote.getId())) {
+					remote.setSelect(true);
+				}
 			}
 
 			try {
@@ -136,6 +144,11 @@ public class RemoteController extends BaseController {
 		remoteLocal.setType(0);
 		remoteLocal.setMonitor(settingService.get("monitorLocal") != null ? Integer.parseInt(settingService.get("monitorLocal")) : 0);
 		remoteLocal.setSystem(SystemTool.getSystem());
+		remoteLocal.setSelect(false);
+		if (context.session("localType").equals("local")) {
+			remoteLocal.setSelect(true);
+		}
+
 		remoteList.add(0, remoteLocal);
 
 		List<Group> groupList = remoteService.getGroupByAdmin(admin);
@@ -301,16 +314,16 @@ public class RemoteController extends BaseController {
 				if (cmd.contentEquals("replace")) {
 					jsonResult = confController.replace(confController.getReplaceJson(), null);
 				}
-				if (cmd.startsWith("start") || cmd.startsWith("stop")) {
-					jsonResult = confController.runCmd(cmd.replace("start ", "").replace("stop ", ""), null);
+				if (cmd.startsWith("startNginx") || cmd.startsWith("stopNginx")) {
+					jsonResult = confController.runCmd(cmd.replaceFirst("startNginx ", "").replaceFirst("stopNginx ", ""), null);
 				}
 				if (cmd.contentEquals("update")) {
 					jsonResult = renderError(m.get("remoteStr.notAllow"));
 				}
-				rs.append("<span class='blue'>" + m.get("remoteStr.local") + "> </span>");
+				rs.append("<span class='blue'>").append(m.get("remoteStr.local")).append("> </span>");
 			} else {
 				Remote remote = sqlHelper.findById(id, Remote.class);
-				rs.append("<span class='blue'>").append(remote.getIp() + ":" + remote.getPort()).append("> </span>");
+				rs.append("<span class='blue'>").append(remote.getIp()).append(":").append(remote.getPort()).append("> </span>");
 
 				if (cmd.contentEquals("check")) {
 					cmd = "checkBase";
@@ -318,15 +331,15 @@ public class RemoteController extends BaseController {
 
 				try {
 					String action = cmd;
-					if (cmd.startsWith("start") || cmd.startsWith("stop")) {
+					if (cmd.startsWith("startNginx") || cmd.startsWith("stopNginx")) {
 						action = "runCmd";
 					}
 
 					String url = remote.getProtocol() + "://" + remote.getIp() + ":" + remote.getPort() + "/adminPage/conf/" + action + "?creditKey=" + remote.getCreditKey();
 
 					Map<String, Object> map = new HashMap<>();
-					if (cmd.startsWith("start") || cmd.startsWith("stop")) {
-						map.put("cmd", cmd.replace("start ", "").replace("stop ", ""));
+					if (cmd.startsWith("startNginx") || cmd.startsWith("stopNginx")) {
+						map.put("cmd", cmd.replaceFirst("startNginx ", "").replaceFirst("stopNginx ", ""));
 					}
 
 					String json = HttpUtil.post(url, map);
@@ -410,7 +423,7 @@ public class RemoteController extends BaseController {
 	@Mapping("setAsycPack")
 	public JsonResult setAsycPack(String json, String adminName) {
 		AsycPack asycPack = JSONUtil.toBean(json, AsycPack.class);
-		
+
 		confService.setAsycPack(asycPack);
 
 		return renderSuccess();
@@ -497,7 +510,7 @@ public class RemoteController extends BaseController {
 	}
 
 	@Mapping("change")
-	public JsonResult change(String id,Context context) {
+	public JsonResult change(String id, Context context) {
 		Remote remote = sqlHelper.findById(id, Remote.class);
 
 		if (remote == null) {

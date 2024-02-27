@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.cym.model.Location;
 import com.cym.model.Server;
-import com.cym.model.Upstream;
 
 public class ServerExt {
 	Server server;
@@ -12,6 +11,16 @@ public class ServerExt {
 	String locationStr;
 	String paramJson;
 	
+	String href;
+	
+	
+	public String getHref() {
+		return href;
+	}
+
+	public void setHref(String href) {
+		this.href = href;
+	}
 
 	public String getParamJson() {
 		return paramJson;

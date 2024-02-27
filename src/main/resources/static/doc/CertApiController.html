@@ -6,7 +6,7 @@
     <meta name="generator" content="smart-doc">
     <title>nginxWebUI</title>
     <link rel="stylesheet" href="font.css">
-    <link rel="stylesheet" href="AllInOne.css?v=1646038809454"/>
+    <link rel="stylesheet" href="AllInOne.css?v=1701413184079"/>
     
     <style>.literalblock pre, .listingblock pre:not(.highlight), .listingblock pre[class="highlight"], .listingblock pre[class^="highlight "], .listingblock pre.CodeRay, .listingblock pre.prettyprint {
         background: #f7f7f8;
@@ -226,7 +226,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/getPage" class="bare">&nbsp;/api/cert/getPage</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;获取证书分页列表</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -251,7 +251,7 @@
                         <td class="tableblock halign-left valign-top"><p class="tableblock">current</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock"> 当前页数(从1开始)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
 
@@ -259,7 +259,7 @@
                         <td class="tableblock halign-left valign-top"><p class="tableblock">limit</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">   每页数量(默认为10)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
 
@@ -275,7 +275,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/getPage?current=215&limit=10&keywords=fsugla</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/getPage?current=1&limit=10&keywords=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -352,135 +352,9 @@
                     </tr>
 
                     <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─id</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">主键</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─domain</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">域名</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─pem</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">pem文件路径</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─key</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">key文件路径</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─type</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">获取方式 0 申请证书 1 手动上传 2 DNS验证</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─makeTime</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">int64</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">签发时间戳</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─autoRenew</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">int32</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">是否自动续签 0否 1是</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─dnsType</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">dns提供商 ali:阿里云  dp:腾讯云  cf:Cloudflare  gd:Godaddy</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─dpId</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">dpId(腾讯云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─dpKey</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">dpKey(腾讯云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─aliKey</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">aliKey(阿里云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─aliSecret</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">aliSecret(阿里云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─cfEmail</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfEmail(Cloudflare需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─cfKey</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">cfKey(Cloudflare需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─gdKey</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">gdKey(Godaddy需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─gdSecret</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">gdSecret(Godaddy需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─hwUsername</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">hwUsername(华为云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─hwPassword</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">hwPassword(华为云需要的参数)</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
-                    </tr>
-
-                    <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─hwProjectID</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">hwProjectID(华为云需要的参数)</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─any object</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">object</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">any object.</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
                     </tbody>
@@ -490,33 +364,35 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "yzyzvp",
-  "msg": "9f17by",
+  "status": "",
+  "msg": "",
   "obj": {
-    "count": 419,
-    "curr": 353,
-    "limit": 10,
+    "count": 0,
+    "curr": 0,
+    "limit": 0,
     "records": [
       {
-        "id": "87",
-        "domain": "walter.net",
-        "pem": "asilom",
-        "key": "fcadjd",
-        "type": 664,
-        "makeTime": 1646038811217,
-        "autoRenew": 423,
-        "dnsType": "34pdeg",
-        "dpId": "87",
-        "dpKey": "9nk0eg",
-        "aliKey": "hrjdiw",
-        "aliSecret": "knt5lu",
-        "cfEmail": "johnsie.ernser@yahoo.com",
-        "cfKey": "ti6y67",
-        "gdKey": "936vgv",
-        "gdSecret": "qj8wcb",
-        "hwUsername": "georgianna.stracke",
-        "hwPassword": "1tt793",
-        "hwProjectID": "87"
+        "id": "",
+        "domain": "",
+        "pem": "",
+        "key": "",
+        "type": 0,
+        "encryption": "",
+        "makeTime": 0,
+        "endTime": 0,
+        "autoRenew": 0,
+        "dnsType": "",
+        "dpId": "",
+        "dpKey": "",
+        "aliKey": "",
+        "aliSecret": "",
+        "cfEmail": "",
+        "cfKey": "",
+        "gdKey": "",
+        "gdSecret": "",
+        "hwUsername": "",
+        "hwPassword": "",
+        "hwDomainName": ""
       }
     ]
   }
@@ -532,9 +408,9 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/addOver" class="bare">&nbsp;/api/cert/addOver</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;添加或编辑证书</p></div>
-                <div class="paragraph"><p><strong>Body-parameters:</strong></p></div>
+                <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
                     <colgroup>
                         <col style="width: 20%;">
@@ -594,9 +470,25 @@
                     </tr>
 
                     <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">encryption</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">加密方式 'RSA' 'ECC'</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">makeTime</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">int64</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">签发时间戳</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+                    </tr>
+
+                    <tr>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">endTime</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">int64</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">到期时间戳</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -612,7 +504,7 @@
                     <tr>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">dnsType</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">dns提供商 ali:阿里云  dp:腾讯云  cf:Cloudflare  gd:Godaddy</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">dns提供商 ali:阿里云  dp:腾讯云  cf:Cloudflare  gd:Godaddy   hw:华为云</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
                     </tr>
@@ -698,7 +590,7 @@
                     </tr>
 
                     <tr>
-                        <td class="tableblock halign-left valign-top"><p class="tableblock">hwProjectID</p></td>
+                        <td class="tableblock halign-left valign-top"><p class="tableblock">hwDomainName</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">hwProjectID(华为云需要的参数)</p></td>
                         <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
@@ -709,7 +601,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/addOver?hwUsername=georgianna.stracke&gdKey=n8ge0j&domain=walter.net&hwPassword=d1sffy&cfKey=t5nu7u&gdSecret=qqp0qx&id=87&dnsType=4io05v&dpKey=a4v45s&aliSecret=16pm4u&key=hofks9&createTime=1646038811217&dpId=87&aliKey=oylvgw&pem=oz4gsf&type=402&autoRenew=797&makeTime=1646038811217&updateTime=1646038811217&cfEmail=johnsie.ernser@yahoo.com&hwProjectID=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/addOver?type=0&makeTime=0&endTime=0&autoRenew=0&pem=&encryption=&dnsType=&aliKey=&key=&cfKey=&gdSecret=&hwDomainName=&domain=&hwPassword=&dpId=&cfEmail=&dpKey=&aliSecret=&hwUsername=&id=&gdKey=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -763,8 +655,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "f56b40",
-  "msg": "fzry3k",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -778,7 +670,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/getTxtValue" class="bare">&nbsp;/api/cert/getTxtValue</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;获取域名解析码</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -811,7 +703,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/getTxtValue?certId=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/getTxtValue?certId=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -900,15 +792,15 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "6zeo2g",
-  "msg": "4ljdtm",
+  "status": "",
+  "msg": "",
   "obj": [
     {
-      "id": "87",
-      "certId": "87",
-      "domain": "walter.net",
-      "type": "ani0xm",
-      "value": "3ps95b"
+      "id": "",
+      "certId": "",
+      "domain": "",
+      "type": "",
+      "value": ""
     }
   ]
 }</code></pre>
@@ -923,7 +815,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/setAutoRenew" class="bare">&nbsp;/api/cert/setAutoRenew</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;设置证书自动续签</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -964,7 +856,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/setAutoRenew?id=87&autoRenew=39</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/setAutoRenew?autoRenew=0&id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1018,8 +910,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "byla56",
-  "msg": "k94094",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -1033,7 +925,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/del" class="bare">&nbsp;/api/cert/del</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;删除证书</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -1066,7 +958,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/del?id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/del?id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1120,8 +1012,8 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "u48in9",
-  "msg": "tkjux2",
+  "status": "",
+  "msg": "",
   "obj": {}
 }</code></pre>
                     </div>
@@ -1135,7 +1027,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/apply" class="bare">&nbsp;/api/cert/apply</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;执行申请</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -1176,7 +1068,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/apply?type=owyng3&id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/apply?id=&type=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-fields:</strong></p></div>
@@ -1265,15 +1157,15 @@
                     <div class="content">
                         <pre><code class="json">{
   "success": true,
-  "status": "g92hjx",
-  "msg": "4jzody",
+  "status": "",
+  "msg": "",
   "obj": [
     {
-      "id": "87",
-      "certId": "87",
-      "domain": "walter.net",
-      "type": "aeijgs",
-      "value": "g2k2d0"
+      "id": "",
+      "certId": "",
+      "domain": "",
+      "type": "",
+      "value": ""
     }
   ]
 }</code></pre>
@@ -1288,7 +1180,7 @@
                 <div class="paragraph"><p><strong>URL:</strong><a href="/api/cert/download" class="bare">&nbsp;/api/cert/download</a>
                 </p></div>
                 <div class="paragraph"><p><strong>Type:</strong>&nbsp;GET</p></div>
-                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=utf-8</p></div>
+                <div class="paragraph"><p><strong>Content-Type:</strong>&nbsp;application/x-www-form-urlencoded;charset=UTF-8</p></div>
                 <div class="paragraph"><p><strong>Description:</strong>&nbsp;下载证书文件</p></div>
                 <div class="paragraph"><p><strong>Query-parameters:</strong></p></div>
                 <table class="tableblock frame-all grid-all spread">
@@ -1321,7 +1213,7 @@
                 <div class="paragraph"><p><strong>Request-example:</strong></p></div>
                 <div class="listingblock">
                     <div class="content">
-                        <pre><code class="bash">curl -X GET -i /api/cert/download?id=87</code></pre>
+                        <pre><code class="bash">curl -X GET -i /api/cert/download?id=</code></pre>
                     </div>
                 </div>
                 <div class="paragraph"><p><strong>Response-example:</strong></p></div>
@@ -1333,12 +1225,12 @@
             </div>
         </div>
     </div>
-    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2022-02-28 17:00:09</span><span
+    <footer class="page-footer"><span class="copyright">Generated by smart-doc at 2023-12-01 14:46:24</span><span
             class="footer-modification">Suggestions,contact,support and error reporting on<a
             href="https://gitee.com/smart-doc-team/smart-doc" target="_blank">&nbsp;Gitee</a>&nbsp;or<a
             href="https://github.com/smart-doc-group/smart-doc.git" target="_blank">&nbsp;Github</a></span></footer>
 </div>
-<script src="search.js?v=1646038809454"></script>
+<script src="search.js?v=1701413184079"></script>
 <script>
     $(function () {
         const Accordion = function (el, multiple) {

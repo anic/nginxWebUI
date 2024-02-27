@@ -12,15 +12,26 @@ import com.cym.model.Credit;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
+import com.cym.utils.AuthUtils;
 import com.cym.utils.EncodePassUtils;
+
+import cn.hutool.core.util.StrUtil;
 
 @Service
 public class AdminService {
 	@Inject
 	SqlHelper sqlHelper;
+	@Inject
+	AuthUtils authUtils;
 
 	public Admin login(String name, String pass) {
-		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getName, name).eq(Admin::getPass, EncodePassUtils.encode(pass)), Admin.class);
+		Admin admin = sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getName, name).eq(Admin::getPass, EncodePassUtils.encode(pass)), Admin.class);
+
+		return admin;
+	}
+
+	public Admin getByAutoKey(String autoKey) {
+		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getAutoKey, autoKey), Admin.class);
 	}
 
 	public Page search(Page page) {
@@ -41,18 +52,20 @@ public class AdminService {
 		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getName, name), Admin.class);
 	}
 
-	public String makeToken(String id) {
+	public Admin makeToken(String id) {
 		String token = UUID.randomUUID().toString();
 		Admin admin = new Admin();
 		admin.setId(id);
 		admin.setToken(token);
+		admin.setTokenTimeout(System.currentTimeMillis() + 24 * 60 * 60 * 1000l); 
 		sqlHelper.updateById(admin);
 
-		return token;
+		return admin;
 	}
 
 	public Admin getByToken(String token) {
-		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getToken, token), Admin.class);
+		Long time = System.currentTimeMillis();
+		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Admin::getToken, token).gt(Admin::getTokenTimeout, time), Admin.class); 
 	}
 
 	public Admin getByCreditKey(String creditKey) {
@@ -71,11 +84,10 @@ public class AdminService {
 	}
 
 	public void addOver(Admin admin, String[] groupIds) {
-		admin.setPass(EncodePassUtils.encode(admin.getPass()));  
 		sqlHelper.insertOrUpdate(admin);
 
 		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(AdminGroup::getAdminId, admin.getId()), AdminGroup.class);
-		if (admin.getType() == 1) {
+		if (admin.getType() == 1 && groupIds != null) {
 			for (String id : groupIds) {
 				AdminGroup adminGroup = new AdminGroup();
 				adminGroup.setAdminId(admin.getId());
@@ -83,6 +95,25 @@ public class AdminService {
 				sqlHelper.insert(adminGroup);
 			}
 		}
+	}
+
+	public void changePassOver(Admin admin) {
+		if (admin.getAuth()) {
+			Admin adminOrg = sqlHelper.findById(admin.getId(), Admin.class);
+			if (StrUtil.isEmpty(adminOrg.getKey())) {
+				admin.setKey(authUtils.makeKey());
+			}
+		} else {
+			admin.setKey("");
+		}
+
+		if (StrUtil.isNotEmpty(admin.getPass())) {
+			admin.setPass(EncodePassUtils.encode(admin.getPass()));
+		} else {
+			admin.setPass(null);
+		}
+		sqlHelper.updateById(admin);
+
 	}
 
 }

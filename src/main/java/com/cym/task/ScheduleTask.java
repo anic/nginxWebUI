@@ -1,7 +1,5 @@
 package com.cym.task;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.schedule.annotation.Scheduled;
+import org.noear.solon.scheduling.annotation.Scheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,6 @@ import com.cym.controller.adminPage.CertController;
 import com.cym.controller.adminPage.ConfController;
 import com.cym.controller.adminPage.RemoteController;
 import com.cym.model.Cert;
-import com.cym.model.Http;
 import com.cym.model.Remote;
 import com.cym.model.Upstream;
 import com.cym.model.UpstreamServer;
@@ -36,12 +33,9 @@ import com.cym.utils.MessageUtils;
 import com.cym.utils.SendMailUtils;
 import com.cym.utils.TelnetUtils;
 
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 
@@ -94,55 +88,6 @@ public class ScheduleTask {
 		}
 	}
 
-	// 分隔日志,每天
-	@Scheduled(cron = "0 55 23 * * ?")
-	public void diviLog() {
-		Http access = httpService.getName("access_log");
-		if (access != null) {
-			cutLog(access);
-		}
-
-		Http error = httpService.getName("error_log");
-		if (access != null) {
-			cutLog(error);
-		}
-
-	}
-
-	private void cutLog(Http http) {
-		String path = http.getValue();
-
-		if (StrUtil.isNotEmpty(path)) {
-			// 去掉格式化
-			path = path.split(" ")[0];
-			if (FileUtil.exist(path)) {
-				String date = DateUtil.format(new Date(), "yyyy-MM-dd");
-				// 分隔日志
-				File dist = new File(path + "." + date);
-				FileUtil.move(new File(path), dist, true);
-				ZipUtil.zip(dist.getPath(), dist.getPath() + ".zip", false); // 打包
-				FileUtil.del(dist); // 删除原文件
-				// 重载Nginx产生新的文件
-				confController.reload(null, null, null);
-
-				// 删除多余文件
-				long time = System.currentTimeMillis();
-
-				File dir = new File(path).getParentFile();
-				for (File file : dir.listFiles()) {
-					if (file.getName().contains(new File(path).getName()) && file.getName().endsWith(".zip")) {
-						String[] array = file.getName().split("[.]");
-						String dateStr = array[array.length - 2];
-						DateTime dateTime = DateUtil.parse(dateStr, "yyyy-MM-dd");
-						if (time - dateTime.getTime() > TimeUnit.DAYS.toMillis(maxHistory)) {
-							FileUtil.del(file);
-						}
-					}
-				}
-			}
-		}
-
-	}
 
 	// 检查远程服务器
 	@Scheduled(cron = "0/30 * * * * ?")
@@ -239,10 +184,4 @@ public class ScheduleTask {
 		}
 	}
 
-	// 测试任务
-//	@Scheduled(cron = "* * * * * ?")
-//	public void test() throws InterruptedException {
-//		Thread.sleep(3000);
-//		System.out.println(DateUtil.format(new Date(), "HHmmss"));
-//	}
 }

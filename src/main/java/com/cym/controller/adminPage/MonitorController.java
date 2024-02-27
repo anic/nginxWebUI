@@ -1,5 +1,7 @@
 package com.cym.controller.adminPage;
 
+import java.util.Date;
+
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -14,7 +16,10 @@ import com.cym.service.SettingService;
 import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
 import com.cym.utils.NetWorkUtil;
+import com.cym.utils.SystemTool;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Mapping("/adminPage/monitor")
@@ -28,9 +33,8 @@ public class MonitorController extends BaseController {
 
 	@Mapping("")
 	public ModelAndView index(ModelAndView modelAndView) {
-
+	
 		modelAndView.put("list", monitorService.getDiskInfo());
-
 		String nginxPath = settingService.get("nginxPath");
 		String nginxExe = settingService.get("nginxExe");
 		String nginxDir = settingService.get("nginxDir");
@@ -39,15 +43,15 @@ public class MonitorController extends BaseController {
 		modelAndView.put("nginxExe", nginxExe);
 		modelAndView.put("nginxPath", nginxPath);
 
-		Boolean isInit = StrUtil.isNotEmpty(nginxExe);
-		modelAndView.put("isInit", isInit.toString());
+		boolean isInit = StrUtil.isNotEmpty(nginxExe);
+		modelAndView.put("isInit", Boolean.toString(isInit));
 
 		modelAndView.view("/adminPage/monitor/index.html");
 		return modelAndView;
 	}
 
-	@Mapping("check")
-	public JsonResult check() {
+	@Mapping("load")
+	public JsonResult load() {
 
 		MonitorInfo monitorInfo = monitorService.getMonitorInfoOshi();
 
@@ -55,10 +59,28 @@ public class MonitorController extends BaseController {
 	}
 
 	@Mapping("network")
-	public JsonResult network() {
+	public JsonResult network() throws InterruptedException {
+		if (SystemTool.isLinux() && !hasIfconfig()) {
+			Thread.sleep(2000);
+			NetworkInfo networkInfo = new NetworkInfo();
+			networkInfo.setTime(DateUtil.format(new Date(), "HH:mm:ss"));
+			networkInfo.setSend(0d);
+			networkInfo.setReceive(0d);
+
+			return renderSuccess(networkInfo);
+		}
+
 		NetworkInfo networkInfo = NetWorkUtil.getNetworkDownUp();
-		// System.err.println(JSONUtil.toJsonStr(networkInfo));
 		return renderSuccess(networkInfo);
+	}
+
+	private boolean hasIfconfig() {
+		String rs = RuntimeUtil.execForStr("which ifconfig");
+		if (StrUtil.isNotEmpty(rs)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Mapping("addNginxGiudeOver")

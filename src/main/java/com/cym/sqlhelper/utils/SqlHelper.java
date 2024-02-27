@@ -1,7 +1,6 @@
 package com.cym.sqlhelper.utils;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.noear.solon.annotation.Component;
-import org.noear.solon.annotation.Configuration;
 import org.noear.solon.annotation.Init;
 import org.noear.solon.annotation.Inject;
 import org.slf4j.Logger;
@@ -31,7 +29,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 
 /**
- * mongodb操作器
+ * jdbc操作器
  *
  */
 @Component
@@ -45,9 +43,9 @@ public class SqlHelper extends SqlUtils {
 
 	static Logger logger = LoggerFactory.getLogger(SqlHelper.class);
 	SnowFlake snowFlake = new SnowFlake(1, 1);
-	
+
 	@Init
-	public void init() throws SQLException {
+	public void start() throws Throwable {
 		Set<Class<?>> set = ClassUtil.scanPackage(packageName);
 		for (Class<?> clazz : set) {
 			tableUtils.initTable(clazz);
@@ -299,7 +297,7 @@ public class SqlHelper extends SqlUtils {
 				paramValues.add(ReflectUtil.getFieldValue(object, field));
 			}
 		}
-		paramValues.add((String) ReflectUtil.getFieldValue(object, "id"));
+		paramValues.add(ReflectUtil.getFieldValue(object, "id"));
 
 		String sql = "UPDATE `" + StrUtil.toUnderlineCase(object.getClass().getSimpleName()) + "` SET " + StrUtil.join(",", fieldsPart) + " WHERE id = ?";
 
@@ -423,7 +421,7 @@ public class SqlHelper extends SqlUtils {
 			sql += " WHERE " + conditionWrapper.build(values);
 		}
 		if (sort != null) {
-			sql += " " + sort.toString();
+			sql += " " + sort;
 		} else {
 			sql += " ORDER BY id DESC";
 		}
@@ -504,7 +502,7 @@ public class SqlHelper extends SqlUtils {
 			sql += " WHERE " + conditionWrapper.build(values);
 		}
 		if (sort != null) {
-			sql += " " + sort.toString();
+			sql += " " + sort;
 		} else {
 			sql += " ORDER BY id DESC";
 		}
@@ -555,7 +553,7 @@ public class SqlHelper extends SqlUtils {
 			sql += " WHERE " + conditionWrapper.build(values);
 		}
 		if (sort != null) {
-			sql += " " + sort.toString();
+			sql += " " + sort;
 		} else {
 			sql += " ORDER BY id DESC";
 		}
@@ -573,7 +571,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return List 列表
 	 */
 	public <T> List<T> findListByQuery(ConditionWrapper conditionWrapper, Class<T> clazz) {
-		return (List<T>) findListByQuery(conditionWrapper, null, clazz);
+		return findListByQuery(conditionWrapper, null, clazz);
 	}
 
 	/**
@@ -585,7 +583,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return List 列表
 	 */
 	public <T> List<T> findListByQuery(Sort sort, Class<T> clazz) {
-		return (List<T>) findListByQuery(null, sort, clazz);
+		return findListByQuery(null, sort, clazz);
 	}
 
 	/**
